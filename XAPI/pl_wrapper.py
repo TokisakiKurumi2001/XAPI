@@ -29,7 +29,7 @@ class LitXAPI(pl.LightningModule):
         cls_loss = self.cls_loss(logits.view(-1, self.cls_class_num), cls_labels.view(-1).long())
 
         self.log("train/loss", cls_loss, sync_dist=True)
-        return loss
+        return cls_loss
 
     def validation_step(self, batch, batch_idx):
         cls_labels = batch.pop('label')
@@ -61,7 +61,7 @@ class LitXAPI(pl.LightningModule):
     def test_epoch_end(self, outputs):
         results = self.cls_valid_metric.compute()
         for k, v in results.items():
-            self.log(f'valid/{k}', v, on_epoch=True, on_step=False, sync_dist=True)
+            self.log(f'test/{k}', v, on_epoch=True, on_step=False, sync_dist=True)
         
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(self.parameters(), lr=self.lr)

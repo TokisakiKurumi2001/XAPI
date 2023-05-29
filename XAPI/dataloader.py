@@ -50,6 +50,6 @@ class XAPIDataLoader:
         res = []
         for type in types:
             res.append(
-                DataLoader(self.dataset[type], batch_size=batch_size, collate_fn=self.__collate_fn, num_workers=1)
+                DataLoader(self.dataset[type], batch_size=batch_size, collate_fn=self.__collate_fn, num_workers=32)
             )
         return res
