@@ -126,13 +126,13 @@ class XAPIDeAttModel(XAPIPreTrainedModel):
             act_fn=self.config.attend_act_fn,
         )
         self.compare = XAPICompare(
-            input_size=self.config.attend_hidden_dim,
+            input_size=self.config.compare_input_dim,
             hidden_size=self.config.compare_hidden_dim,
             drop_prob=self.config.drop_prob,
             act_fn=self.config.compare_act_fn,
         )
         self.aggregate = XAPIAggregate(
-            input_size=self.config.compare_hidden_dim,
+            input_size=self.config.aggregate_input_dim,
             hidden_size=self.config.aggregate_hidden_dim,
             drop_prob=self.config.drop_prob,
             act_fn=self.config.aggregate_act_fn,
@@ -140,9 +140,7 @@ class XAPIDeAttModel(XAPIPreTrainedModel):
 
         self.post_init()
 
-    def forward(self, embedding_1, embedding_2):
-        A = embedding_1
-        B = embedding_2
+    def forward(self, A, B):
         beta, alpha = self.attend(A, B)
         V_A, V_B = self.compare(A, B, beta, alpha)
         out = self.aggregate(V_A, V_B)
@@ -152,8 +150,8 @@ class XAPIModel(nn.Module):
     def __init__(self, ckpt: str, mapper_ckpt: str = '', mode: str="train"):
         super(XAPIModel, self).__init__()
         if mode == "train":
-            self.config = PADConfig()
-            self.deatt = XAPIDeAttModel(config)
+            self.config = XAPIConfig()
+            self.deatt = XAPIDeAttModel(self.config)
         else:
             self.deatt = XAPIDeAttModel.from_pretrained(mapper_ckpt)
             self.config = self.deatt.config
@@ -177,6 +175,8 @@ class XAPIModel(nn.Module):
                 input_ids=inputs['input_ids_2'],
                 attention_mask=inputs['attention_mask_2']
             )
-        out = self.deatt(input_1, input_2)
+        embedding_1 = input_1.last_hidden_state
+        embedding_2 = input_2.last_hidden_state
+        out = self.deatt(embedding_1, embedding_2)
         logits = self.out(out)
         return logits

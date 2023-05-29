@@ -45,7 +45,7 @@ class LitXAPI(pl.LightningModule):
     def validation_epoch_end(self, outputs):
         results = self.cls_valid_metric.compute()
         for k, v in results.items():
-            self.log(f'valid/{k}', v on_epoch=True, on_step=False, sync_dist=True)
+            self.log(f'valid/{k}', v, on_epoch=True, on_step=False, sync_dist=True)
 
     def test_step(self, batch, batch_idx):
         cls_labels = batch.pop('label')
@@ -61,7 +61,7 @@ class LitXAPI(pl.LightningModule):
     def test_epoch_end(self, outputs):
         results = self.cls_valid_metric.compute()
         for k, v in results.items():
-            self.log(f'valid/{k}', v on_epoch=True, on_step=False, sync_dist=True)
+            self.log(f'valid/{k}', v, on_epoch=True, on_step=False, sync_dist=True)
         
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(self.parameters(), lr=self.lr)

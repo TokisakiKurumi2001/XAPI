@@ -32,7 +32,7 @@ class XAPIDataLoader:
             rt_dict[f'{k}_1'] = v
         for k, v in toks_2.items():
             rt_dict[f'{k}_2'] = v
-        rt_dict = examples['label']
+        rt_dict['label'] = examples['label']
         return rt_dict
 
     def __collate_fn(self, examples):
